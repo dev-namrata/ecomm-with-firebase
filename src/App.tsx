@@ -1,24 +1,49 @@
-import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  useLocation,
+  useNavigation,
+} from 'react-router-dom';
+import { CartProvider } from 'react-use-cart';
+
+import { createTheme, ThemeProvider } from '@mui/material/styles';
+import { useEffect, useState } from 'react';
+import { auth } from './firebase_setup/firebase';
+
+import { ForgotPassword, Home, Login, Signup } from './pages';
+import { Cart, CrousalImg, Footer, Header } from './Components';
 
 function App() {
+  const defaultTheme = createTheme();
+  const [userName, setUserName] = useState('');
+  useEffect(() => {
+    auth.onAuthStateChanged((user: any) => {
+      if (user) {
+        console.log(user, 'user');
+
+        setUserName(user?.displayName);
+      }
+    });
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <ThemeProvider theme={defaultTheme}>
+        <BrowserRouter>
+          <Header user={userName} />
+          <Routes>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/" element={<Home name={userName} />}></Route>
+
+            <Route path="/login" element={<Login />}></Route>
+            <Route path="/signup" element={<Signup />}></Route>
+            <Route path="/reset" element={<ForgotPassword />}></Route>
+          </Routes>
+        </BrowserRouter>
+      </ThemeProvider>
+      {/* <CrousalImg /> */}
     </div>
   );
 }
